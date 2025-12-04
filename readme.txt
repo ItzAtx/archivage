@@ -1,13 +1,3 @@
-Cette archive zip est censée contenir les fichiers suivants : 
--chiffrement.c
--chiffrement.h
--cipher.c
--cipher_total.c
--decipher.c
--decipher_total.c
--findkey.c
--Makefile
-
 COMPILATION : 
 
 make all : compile tous les outils + la bibliothèque statique
@@ -51,4 +41,5 @@ Permet de retrouver la clé de chiffrement à partir d'un fichier en clair et de
 UTILISATION DE FINDKEY :
 
 findkey :
+
 ./findkey <fichier_clair> <fichier_chiffré>
