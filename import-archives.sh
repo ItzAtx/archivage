@@ -1,3 +1,5 @@
+#!/bin/bash
+
 #On vérifie que le dossier existe
 if [ ! -d ".sh-toolbox" ]; then
         echo "Erreur : le dossier .sh-toolbox n'existe pas."
