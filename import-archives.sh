@@ -69,4 +69,5 @@ if [ "$1" = "-f" ]; then
 				fi
 	done
 
-	exit 0
+fi
+exit 0
