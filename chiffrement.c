@@ -333,7 +333,7 @@ Renvoie la clé de chiffrement utilisée sur stdout et sa taille sur stderr
 
 Cette fonction détermine la clé qui a été utilisée pour transformer plain_name en ciphered_name
 */
-void findkey(string plain_name, string ciphered_name){
+void findkey(string plain_name, string ciphered_name, string path, int mode){
     FILE *plain = fopen(plain_name, "rb");
     FILE *ciphered = fopen(ciphered_name, "rb");
 
@@ -411,7 +411,12 @@ void findkey(string plain_name, string ciphered_name){
     size_t real_key_size;
     unsigned string real_key = base64_decode(key_b64_padded, padded_len, &real_key_size);
 
-    printf("%s\n", real_key);
+    if (!mode){
+        printf("%s\n", real_key);
+    } else {
+        FILE *f = fopen(path, "w");
+        fprintf(f, "%s\n", real_key);
+    }
     fprintf(stderr, "%ld\n", real_key_size);
 
     free(plain_data);
@@ -431,7 +436,7 @@ Renvoie la clé de chiffrement utilisée sur stdout et sa taille sur stderr
 
 Cette fonction détermine la clé qui a été utilisée pour transformer plain_name en ciphered_name
 */
-void findkey_total(string plain_name, string ciphered_name){
+void findkey_total(string plain_name, string ciphered_name, string path, int mode){
     FILE *plain = fopen(plain_name, "rb");
     FILE *ciphered = fopen(ciphered_name, "rb");
 
@@ -516,7 +521,12 @@ void findkey_total(string plain_name, string ciphered_name){
     size_t real_key_size;
     unsigned string real_key = base64_decode(key_b64_padded, padded_len, &real_key_size);
 
-    printf("%s\n", real_key);
+    if (!mode){
+        printf("%s\n", real_key);
+    } else {
+        FILE *f = fopen(path, "w");
+        fprintf(f, "%s\n", real_key);
+    }
     fprintf(stderr, "%ld\n", real_key_size);
 
     free(plain_data);

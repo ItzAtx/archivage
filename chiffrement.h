@@ -29,7 +29,7 @@ unsigned string base64_decode(const string data, size_t input_length, size_t *ou
 string VigenereCipher(string text, string key, int mode);
 void cipher_total(string filename, string key);
 void decipher_total(string filename, string key);
-void findkey_total(string plainname, string cipheredname);
+void findkey_total(string plainname, string cipheredname, string path, int mode);
 void cipher(string filename, string key);
 void decipher(string filename, string key);
-void findkey(string plainname, string cipheredname);
+void findkey(string plainname, string cipheredname, string path, int mode);
