@@ -1,4 +1,5 @@
-Ce dossier est censé contenir les fichiers suivants : 
+Ce dossier est censé contenir les fichiers suivants :
+-Un dossier "src"
 -check-archive.sh
 -import-archives.sh
 -init-toolbox.sh
@@ -49,3 +50,4 @@ Restaure les fichiers chiffrés d'une archive en récupérant automatiquement la
 
 Utilisation : ./restore-archive.sh <dossier_destination>
 -----------------
+
