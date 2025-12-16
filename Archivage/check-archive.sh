@@ -55,7 +55,7 @@ if [ $t -eq 0 ]; then
         exit 32
 fi
 
-mkdir "stock_decomp"
+mktemp "stock_decomp"
 echo "Décompression en cours"
 
 if ! tar -xzf ".sh-toolbox/$rep" -C "stock_decomp"; then
