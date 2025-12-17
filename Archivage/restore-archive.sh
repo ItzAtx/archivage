@@ -64,26 +64,23 @@ done
 
 for chiff in $(cat encrypted_files); do
         nom=$(basename $chiff)
+        taille=$(stat -c %s $chiff)
         clair=""
 
         for f in $(find "$tmp/data" -type f); do
                 nom2=$(basename "$f")
                 ts2=$(stat -c %Y "$f")
+                taille2=$(stat -c %s "$f")
 
-                if [ "$nom2" = "$nom" ] && [ "$ts2" -lt "$timestamp_admin" ]; then
+                if [ "$nom2" = "$nom" ] && [ "$ts2" -lt "$timestamp_admin" ] && [ "$taille2" -eq "$taille" ]; then
                         clair="$f"
-                        read -p "Voulez vous rediriger la clé dans un fichier ? (o/n) " rep_redi
                         base64 -w0 $clair > tmp_d
                         base64 -w0 $chiff > tmp_c
-                        if [ "$rep_redi" = n ]; then
-                                cle=$("$FINDKEY" tmp_d tmp_c 2>sortie_erreur.txt)
-                        else
-                                redi_path="${choix%%.*}"
-                                mkdir -p .sh-toolbox/$redi_path
-                                touch .sh-toolbox/$redi_path/KEY
-                                "$FINDKEY" tmp_d tmp_c -o .sh-toolbox/$redi_path/KEY 2> sortie_erreur.txt
-                                cle=$(cat .sh-toolbox/$redi_path/KEY)
-                        fi
+                        redi_path="${choix%%.*}"
+                        mkdir -p .sh-toolbox/$redi_path
+                        touch .sh-toolbox/$redi_path/KEY
+                        "$FINDKEY" tmp_d tmp_c -o .sh-toolbox/$redi_path/KEY 2> sortie_erreur.txt
+                        cle=$(cat .sh-toolbox/$redi_path/KEY)
                         break
                 fi
         done
