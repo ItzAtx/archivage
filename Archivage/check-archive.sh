@@ -47,7 +47,6 @@ for i in $(ls .sh-toolbox); do
         if [ "$rep" = "$i" ]; then
                 t=1
         fi
-        
 done
 
 if [ $t -eq 0 ]; then
@@ -55,7 +54,12 @@ if [ $t -eq 0 ]; then
         exit 32
 fi
 
-mktemp "stock_decomp"
+if [ -d "stock_decomp" ]; then
+	rm -R "stock_decomp"
+fi
+
+mkdir stock_decomp
+
 echo "Décompression en cours"
 
 if ! tar -xzf ".sh-toolbox/$rep" -C "stock_decomp"; then
