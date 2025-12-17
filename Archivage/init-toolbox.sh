@@ -1,9 +1,18 @@
 #!/bin/bash
 
+gcc --version >/dev/null 2>&1
+if [ $? -ne 0 ]; then
+	echo "Erreur : Vous n'avez pas GCC d'installé"
+	exit 11
+else
+	echo "GCC est installé"
+fi
+
 #Vérifie l'existence dossier .sh-toolbox
 if [ -d ".sh-toolbox" ]; then
 	echo "Le dossier .sh-toolbox existe"
 else
+	echo "Création du dossier .sh-toolbox"
 	mkdir ".sh-toolbox"
 	if [ $? -ne 0 ]; then
 		echo "Erreur : création du dossier impossible"
