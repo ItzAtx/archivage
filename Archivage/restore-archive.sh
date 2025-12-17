@@ -64,12 +64,10 @@ done
 
 for chiff in $(cat encrypted_files); do
         nom=$(basename $chiff)
-        taille=$(stat -c %s "$chiff")
         clair=""
 
         for f in $(find "$tmp/data" -type f); do
                 nom2=$(basename "$f")
-                taille2=$(stat -c %s "$f")
                 ts2=$(stat -c %Y "$f")
 
                 if [ "$nom2" = "$nom" ] && [ "$ts2" -lt "$timestamp_admin" ]; then
