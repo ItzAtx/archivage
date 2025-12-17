@@ -26,69 +26,56 @@ if [ ! -f ".sh-toolbox/$choix" ]; then
         exit 5
 fi
 
+tmp="stock_decomp"
+mkdir -p "$tmp"
+tar -xzf ".sh-toolbox/$choix" -C "$tmp"
+
 BIN_DIR="./src"
 FINDKEY="$BIN_DIR/findkey"
 DECIPHER="$BIN_DIR/decipher"
 
 #Vérification que le fichier est chiffré
 
-tmp="restore_tmp"
-mkdir -p "$tmp"
-tar -xzf ".sh-toolbox/$choix" -C "$tmp"
+echo
+echo "Analyse de l'archive en cours..."
+echo "$choix" | ./check-archive.sh > check_output.txt 2>&1
 
-login_line=$(grep -E "(Accepted|session opened).*admin" "$tmp/var/log/auth.log" | tail -n 1)
-
-mois=$(echo "$login_line" | cut -d' ' -f1)
-jour=$(echo "$login_line" | cut -d' ' -f2)
-heure=$(echo "$login_line" | cut -d' ' -f3)
-annee=$(date +%Y)
-timestamp_admin=$(date -d "$mois $jour $annee $heure" +%s)
-
-> encrypted_files
-
-if [ ! -d "$tmp/data" ]; then
-        echo "Erreur : Aucun dossier data trouvé dans l'archive"
+check_exit=$?
+if [ $check_exit -ne 0 ]; then
+        echo "Erreur : l'analyse de l'archive à échouée"
+        cat check_output.txt
+        rm -f check_output.txt
         exit 5
 fi
 
-for f in $(find "$tmp/data" -type f); do
-    ts=$(stat -c %Y "$f")
+> encrypted_files
 
-    if [ $ts -ge $timestamp_admin ]; then
-        echo "$f" >> encrypted_files   #on stocke le fichier chiffré
-    fi
-done
+grep "^$tmp/data" check_output.txt > encrypted_files
 
+if [ ! -s encrypted_files ]; then
+        echo "Erreur : Aucun fichier chiffré détecté"
+        rm -f check_output.txt encrypted_files
+        exit 5
+fi
 
-#On retrouve la clé de déchiffrement pour chaque fichier
+cle=""
+clair=""
+chiff=""
 
-for chiff in $(cat encrypted_files); do
-        nom=$(basename $chiff)
-        taille=$(stat -c %s $chiff)
-        clair=""
-
-        for f in $(find "$tmp/data" -type f); do
-                nom2=$(basename "$f")
-                ts2=$(stat -c %Y "$f")
-                taille2=$(stat -c %s "$f")
-
-                if [ "$nom2" = "$nom" ] && [ "$ts2" -lt "$timestamp_admin" ] && [ "$taille2" -eq "$taille" ]; then
-                        clair="$f"
-                        base64 -w0 $clair > tmp_d
-                        base64 -w0 $chiff > tmp_c
-                        redi_path="${choix%%.*}"
-                        mkdir -p .sh-toolbox/$redi_path
-                        touch .sh-toolbox/$redi_path/KEY
-                        "$FINDKEY" tmp_d tmp_c -o .sh-toolbox/$redi_path/KEY 2> sortie_erreur.txt
-                        cle=$(cat .sh-toolbox/$redi_path/KEY)
-                        break
-                fi
-        done
-
-        if [ -n "$cle" ]; then
+while read line; do
+        if echo "$line" | grep -q "On a trouvé le fichier"; then
+                chiff=$(echo "$line" | sed 's/On a trouvé le fichier \(.*\) avant .*/\1/')
+                clear=$(echo "$line" | sed 's/.*il s.agit de : \(.*\)/\1/')
+                base64 -w0 $chiff > tmp_c
+                base64 -w0 $clear > tmp_d
+                redi_path="${choix%%.*}"
+                mkdir -p .sh-toolbox/$redi_path
+                touch .sh-toolbox/$redi_path/KEY
+                $FINDKEY tmp_d tmp_c -o .sh-toolbox/$redi_path/KEY 2> sortie_erreur.txt
+                cle=$(cat .sh-toolbox/$redi_path/KEY)
                 break
         fi
-done
+done < check_output.txt
 
 if [ -z "$cle" ]; then
         echo "Erreur : Impossible de retrouver la clé"
@@ -98,11 +85,7 @@ fi
 #On met la clé dans archives
 
 date_import=$(grep "^$choix:" .sh-toolbox/archives | cut -d':' -f2)
-if [ "$rep_redi" = n ]; then
-        sed -i "s/^$choix:.*/$choix:$date_import:$cle:s/" .sh-toolbox/archives
-else
-        sed -i "s/^$choix:.*/$choix:$date_import::f/" .sh-toolbox/archives
-fi
+sed -i "s/^$choix:.*/$choix:$date_import::f/" .sh-toolbox/archives
 
 #On récupère le contenu des fichiers
 
@@ -130,4 +113,5 @@ rm tmp_d
 rm tmp_c
 rm encrypted_files
 rm -rf $tmp
+rm check_output.txt
 exit 0

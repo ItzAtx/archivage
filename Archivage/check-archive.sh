@@ -16,23 +16,10 @@ fi
 
 
 echo
-#On affiche la liste des archives présentes dans le dossier
-echo "Liste des archives présentes dans le dossier :"
-for i in $(ls .sh-toolbox); do
-        if [ "$i" = "archives" ]; then
-                continue
-        fi
-
-        if [ -d ".sh-toolbox/$i" ]; then
-                continue
-        fi
-        echo $i
-
-done
-echo
-
 t=0
-read -p "Entrez le nom de l'archive que vous voulez : " rep
+echo "Entrez le nom de l'archive que vous voulez checker : "
+read rep
+echo
 
 #On décompresse l'archive choisie
 for i in $(ls .sh-toolbox); do
@@ -145,7 +132,7 @@ while read affecte; do
 
                         #Test si ils ont le même nom et la même taille que le fichier modifié
                         if [ "$le_nom" = "$nom" ] && [ "$la_taille" -eq "$taille" ]; then
-                                echo "On a trouvé le fichier $affecte avant qu'il ne soit chiffré, il s'agit de : $(basename $f)"
+                                echo "On a trouvé le fichier $affecte avant qu'il ne soit chiffré, il s'agit de : $f"
                         fi
                 fi
 
@@ -153,5 +140,4 @@ while read affecte; do
 
 done < modif_list
 rm  "modif_list"
-rm -rf "stock_decomp"
 exit 0
