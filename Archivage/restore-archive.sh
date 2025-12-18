@@ -38,23 +38,23 @@ DECIPHER="$BIN_DIR/decipher"
 
 echo
 echo "Analyse de l'archive en cours..."
-echo "$choix" | ./check-archive.sh > check_output.txt
+echo "$choix" | ./check-archive.sh > check_output
 
 check_exit=$?
 if [ $check_exit -ne 0 ]; then
         echo "Erreur : l'analyse de l'archive à échouée"
-        cat check_output.txt
-        rm -f check_output.txt
+        cat check_output
+        rm -f check_output
         exit 5
 fi
 
 > encrypted_files
 
-grep "^$tmp/data" check_output.txt > encrypted_files
+grep "^$tmp/data" check_output > encrypted_files
 
 if [ ! -s encrypted_files ]; then
         echo "Erreur : Aucun fichier chiffré détecté"
-        rm -f check_output.txt encrypted_files
+        rm -f check_output encrypted_files
         exit 5
 fi
 
@@ -75,10 +75,11 @@ while read line; do
                 cle=$(cat .sh-toolbox/$redi_path/KEY)
                 break
         fi
-done < check_output.txt
+done < check_output
 
 if [ -z "$cle" ]; then
         echo "Erreur : Impossible de retrouver la clé"
+        rm -R ".sh-toolbox/$redi_path"
         exit 5
 fi
 
@@ -87,9 +88,16 @@ fi
 date_import=$(grep "^$choix:" .sh-toolbox/archives | cut -d':' -f2)
 if [ -f .sh-toolbox/$redi_path/KEY ]; then
         sed -i "s/^$choix:.*/$choix:$date_import::f/" .sh-toolbox/archives
-else
-        sed -i "s/^$choix:.*/$choix:$date_import:$cle:s/" .sh-toolbox/archives
 fi
+
+for line in $(cat .sh-toolbox/archives); do
+        if echo "$line" | grep -qE '^[^:]+:[^:]+:[^:]+$'; then
+                echo "$line:s" >> .sh-toolbox/archives_tmp
+        else
+                echo "$line" >> .sh-toolbox/archives_tmp
+        fi
+done
+mv .sh-toolbox/archives_tmp .sh-toolbox/archives
 
 #On récupère le contenu des fichiers
 
@@ -121,5 +129,5 @@ rm tmp_d
 rm tmp_c
 rm encrypted_files
 rm -rf $tmp
-rm check_output.txt
+rm check_output
 exit 0
