@@ -3,6 +3,11 @@ if [ $# -ne 1 ]; then
         exit 5
 fi
 
+if [ ! -d .sh-toolbox ]; then
+        echo "Erreur : .sh-toolbox n'existe pas"
+        exit 1
+fi
+
 if [ ! -d $1 ]; then
 	mkdir -p $1
 fi
@@ -10,11 +15,6 @@ fi
 if [ ! -d $1 ]; then
         echo "Erreur : création du dossier de destination impossible"
         exit 2
-fi
-
-if [ ! -d .sh-toolbox ]; then
-        echo "Erreur : .sh-toolbox n'existe pas"
-        exit 1
 fi
 
 echo "Archives disponibles :"
