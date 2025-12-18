@@ -1,11 +1,14 @@
 #!/bin/bash
 
+#Vérifie l'existence du dossier .sh-toolbox
 if [ ! -d .sh-toolbox ]; then
     echo "Erreur : Le dossier .sh-toolbox n'existe pas"
     exit 1
+fi
 
-elif [ ! -f .sh-toolbox/archives ]; then
-    echo "Erreur, : Le fichier archives manque"
+#Vérifie l'existence du fichier archives
+if [ ! -f .sh-toolbox/archives ]; then
+    echo "Erreur : Le fichier archives manque"
     exit 2
 fi
 
@@ -20,17 +23,19 @@ while read -r ligne; do
         continue
     fi
 
+    #On extrait les informations
     archive=$(echo "$ligne" | cut -d ':' -f 1)   
     date=$(echo "$ligne"   | cut -d ':' -f 2)
     cle=$(echo "$ligne"    | cut -d ':' -f 3)
 
-	#Si la clé est vide
+	#On regarde si la clé est connue ou non
     if [ -n "$cle" ]; then
         cle="Clé connue"
     elif [ -z "$cle" ]; then
         cle="Clé inconnue"
     fi
 
+    #Si la clé est du texte vide
     cle_vide=$(echo "$(echo "$ligne" | cut -d ':' -f 3)" | sed -n '/^[ \t]*$/p')
 
     if [ -n "$cle_vide" ]; then
@@ -39,12 +44,12 @@ while read -r ligne; do
 
     occurrence=""
 
-    #On parcourt les fichiers du dossier  essayant de matcher une  ligne
+    #On vérifie pour chaque lignes dans archives que l'archive correspondante existe bien dans le dossier
     for lig in .sh-toolbox/*; do
 	    lig=$(basename "$lig")
-        [ "$lig" = "archives" ] && continue #ignorer archives
+        [ "$lig" = "archives" ] && continue #On ignore le fichier archives
 
-        #Si l'archive mentionnée dans archives = le fichier dans .sh-toolbox
+        #Si l'archive mentionnée dans archives = le fichier dans .sh-toolbox, alors existe
         if [ "$archive" = "$lig" ]; then
             occurrence="oui"
         fi
@@ -63,7 +68,7 @@ while read -r ligne; do
 
 done < .sh-toolbox/archives
 
-
+#Pour toutes les archives, on regarde si elle est dans le fichier archives
 for f in .sh-toolbox/*; do
 	f=$(basename "$f")
 

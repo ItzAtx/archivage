@@ -1,5 +1,6 @@
 #!/bin/bash
 
+#Vérifie l'existence du dossier .sh-toolbox
 if [ -d .sh-toolbox ]; then
         echo "Le dossier .sh-toolbox existe"
 else
@@ -7,6 +8,7 @@ else
         exit 1
 fi
 
+#Vérifie l'existence du fichier archives
 if [ -f .sh-toolbox/archives ]; then
         echo "Le fichier archives existe dans .sh-toolbox"
 else
@@ -21,13 +23,13 @@ echo "Entrez le nom de l'archive que vous voulez checker : "
 read rep
 echo
 
-#On décompresse l'archive choisie
+#Vérifie que l'archive choisie existe bien
 for i in $(ls .sh-toolbox); do
-        if [ "$i" = "archives" ]; then
+        if [ "$i" = "archives" ]; then #Ignore le fichier archives
                 continue
         fi
 
-        if [ -d ".sh-toolbox/$i" ]; then
+        if [ -d ".sh-toolbox/$i" ]; then #Ignore les dossiers
                 continue
         fi
 
@@ -49,7 +51,7 @@ mkdir stock_decomp
 
 echo "Décompression en cours"
 
-if ! tar -xzf ".sh-toolbox/$rep" -C "stock_decomp"; then
+if ! tar -xzf ".sh-toolbox/$rep" -C "stock_decomp"; then #Décompression de l'archive
         echo "Erreur : La décompression n'as pas reussie"
         exit 3
 fi
@@ -65,17 +67,15 @@ echo
 echo "La dernière connexion de admin fut : "
 
 #On sélectionne la ligne de dernière connexion
-
 mois=$(grep -E "(Accepted.*for admin.*|session opened for user admin.*)" stock_decomp/var/log/auth.log | tail -n 1 | cut -d' ' -f1)
 jour=$(grep -E "(Accepted.*for admin.*|session opened for user admin.*)" stock_decomp/var/log/auth.log | tail -n 1 | cut -d' ' -f2)
 heure=$(grep -E "(Accepted.*for admin.*|session opened for user admin.*)" stock_decomp/var/log/auth.log | tail -n 1 | cut -d' ' -f3)
 
-#Comme le fichier des données de test ne contient pas l'année, on complète avec année acutelle en supposant que tout a lieu la même année
-annee=$(date +%Y)
+annee=2025 #On suppose que tout s'est déroulé en 2025 (car le fichier des données de test ne contient pas l'année)
 derniere="$mois $jour $annee $heure"
 echo $derniere
 
-#Comme stat donne le nombre de secondes écoulées depuis le 1 er janvier 1970, on dois donc convertir la dernière connexion de admin en secondes
+#On convertit la date en secondes
 sec=$(date -d "$derniere" +%s )
 
 #On affiche seulement ceux modifiés après cette connexion.
@@ -89,8 +89,6 @@ if [ -z "$(ls -A stock_decomp/data)" ]; then
     echo "Erreur : Le dossier de données est vide"
     exit 5
 fi
-
-
 
 for f in $(find stock_decomp/data -type f); do
     ts=$(stat -c %Y "$f")
@@ -121,7 +119,7 @@ while read affecte; do
                 #On ignore le fichier modifié lui-même
                 [ "$f" = "$affecte" ] && continue
 
-                #Timestamp de derniere modification en secondes (option Y de stat)
+                #Timestamp de derniere modification en secondes
                 ts_f=$(stat -c %Y "$f")
 
                 #On regarde si le timestamp de la dernière modification est inférieur à celui de la dernière connexion de admin

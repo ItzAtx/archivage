@@ -1,5 +1,6 @@
 #!/bin/bash
 
+#Vérifie l'existence de gcc
 gcc --version >/dev/null 2>&1
 if [ $? -ne 0 ]; then
 	echo "Erreur : Vous n'avez pas GCC d'installé"
@@ -8,7 +9,7 @@ else
 	echo "GCC est installé"
 fi
 
-#Vérifie l'existence dossier .sh-toolbox
+#Vérifie l'existence du dossier .sh-toolbox
 if [ -d ".sh-toolbox" ]; then
 	echo "Le dossier .sh-toolbox existe"
 else
@@ -21,7 +22,7 @@ else
 	fi
 fi
 
-#Vérifie l'existence fichier archives
+#Vérifie l'existence du fichier archives
 if [ -f ".sh-toolbox/archives" ]; then
 	echo "Le fichier archives existe dans .sh-toolbox"
 else

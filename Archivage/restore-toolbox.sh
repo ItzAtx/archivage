@@ -12,7 +12,7 @@ if [ ! -d ".sh-toolbox" ]; then
     fi
 fi
 
-#On vérifie l'existence du fichier archives et qu'il est régulier
+#On vérifie l'existence du fichier archives
 if [ ! -f ".sh-toolbox/archives" ]; then
     echo "Le fichier archives n'existe pas dans .sh-toolbox"
     read -p "Voulez-vous qu'il soit créé ? (o/n) : " rep
@@ -29,12 +29,11 @@ compteur=$(head -n 1 .sh-toolbox/archives)
 courant=2 #Pour sauter la ligne du compteur
 total=$(wc -l < .sh-toolbox/archives)
 
+#Vérifie que toutes les archives dans .sh-toolbox sont mentionnées dans le fichier archives
 while [ $courant -le $total ]; do
     ligne=$(sed -n "${courant}p" .sh-toolbox/archives) 
-    #On selectionne uniquement la ligne numero courant
     archive=$(echo "$ligne" | cut -d ':' -f 1)
 
-    #On vérifie si l'archive existe dans .sh-toolbox
     occurrence=""
     for lig in .sh-toolbox/*; do
         lig=$(basename "$lig")
@@ -72,7 +71,7 @@ while [ $courant -le $total ]; do
     fi
 done
 
-#On prend un fichier f dans .sh-toolbox
+#Vérifie que toutes les archives dans le fichier archives existent dans le dossier .sh-toolbox
 for f in .sh-toolbox/*; do
     f=$(basename "$f")
     #On ignore le fichier archives

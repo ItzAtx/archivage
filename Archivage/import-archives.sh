@@ -1,36 +1,40 @@
-#On vérifie que le dossier existe
+#!/bin/bash
+
+#-------VÉRIFICATIONS-------
+
+#Existence de .sh-toolbox
 if [ ! -d ".sh-toolbox" ]; then
         echo "Erreur : le dossier .sh-toolbox n'existe pas."
         exit 1
 fi
 
-#On vérifie que le fichier existe
+#Existence de .sh-toolbox/archives
 if [ ! -f ".sh-toolbox/archives" ]; then
         echo "Erreur : le fichier archives est manquant dans .sh-toolbox."
         exit 7
 fi
 
-#Condition pour choisir le mode d'importation
-if [ "$1" = "-f" ]; then
 
+if [ "$1" = "-f" ]; then
+	#-------AVEC OPTION -f-------
 	if [ $# -lt 2 ]; then
 		echo "Erreur : Il faut au moins une archive"
 		exit 6
 	fi
 
-	shift
+	shift #On enlève -f
 
 	for i in $@; do #On parcourt les arguments passés un à un
 		nom_arch=$(basename "$i")
 		date_import=$(date +%Y%m%d-%H%M%S)
 
-		if [ ! -f "$i" ] ; then
+		if [ ! -f "$i" ] ; then  #Vérifie si l'archive existe
 			echo "Erreur : Le chemin $nom_arch est invalide"
 			echo "Le programme n'importe les archives suivantes que s'il n'as pas rencontré de problèmes avec les précédentes"
 			exit 2
 		fi
 
-		if [[ "$nom_arch" != *.tar.gz ]]; then #Vérifie l'extentsion
+		if [[ "$nom_arch" != *.tar.gz ]]; then #Vérifie l'extension
             echo "Erreur : l'extension de votre $nom_arch n'est pas .tar.gz"
             exit 2
         fi
@@ -40,10 +44,11 @@ if [ "$1" = "-f" ]; then
 		for l in .sh-toolbox/*; do
 			l_n=$(basename $l)
 
-			if [ "$l_n" = "archives" ]; then #ignore le fichier archives quand il le croise
+			if [ "$l_n" = "archives" ]; then #Ignore le fichier archives quand il le croise
 				continue
 			fi
 
+			#-------CAS DEJA PRESENT-------
 			if [ "$l_n" = "$nom_arch" ]; then
 				present="o"
 
@@ -51,10 +56,11 @@ if [ "$1" = "-f" ]; then
 					echo "Erreur : La copie de  $nom_arch n'as pas réussie"
 					echo "Le programme n'importe les archives suivantes que s'il n'as pas rencontré de problèmes avec les précédentes"
 					exit 3
-				fi  # met a jour la date seulement sans toucher au compteur 
+				fi
 
 				echo "importation forcee de $nom_arch"
 
+				#Met à jour la date seulement sans toucher au compteur 
 				if ! sed -i "/^${nom_arch}:/s/:[^:]*:/:$date_import:/" ".sh-toolbox/archives"; then
 					echo "Erreur : Problème lors de la mise à jour d'archives"
 					echo "Le programme n'importe les archives suivantes que s'il n'as pas rencontré de problèmes avec les précédentes"
@@ -63,8 +69,8 @@ if [ "$1" = "-f" ]; then
 
 			fi
 
-		done #Si archives n'existe pas dans le dossier, alors on ajoute une nouvelle ligne et on incrémente le compteur
-
+		done
+		#-------CAS PAS PRESENT-------
 		if [ "$present" != "o" ]; then
 
 			if ! cp $i .sh-toolbox; then
@@ -74,6 +80,8 @@ if [ "$1" = "-f" ]; then
 			fi
 
 			echo "Importation forcée de $nom_arch"
+
+			#On ajoute une nouvelle ligne et on incrémente le compteur
 	        compteur=$(head -n1 ".sh-toolbox/archives")
 
         	if ! sed -i "1s|.*|$((compteur+1))|" ".sh-toolbox/archives"; then
@@ -81,14 +89,14 @@ if [ "$1" = "-f" ]; then
                 echo "Le programme n'importe les archives suivantes que s'il n'as pas rencontré de problèmes avec les précédentes"
                 exit 4
 			fi
-            #On rajoute la ligne de la nouvelle archive importee
+            #On rajoute la ligne de la nouvelle archive importée
             echo "${nom_arch}:${date_import}:" >> ".sh-toolbox/archives"
 		fi
 	done
 
 else
 
-	#Si le choix n'est pas l'importation forcée, alors on regarde si il y a au moins un argument
+	#-------SANS OPTION -f-------
 	if [ $# -lt 1 ]; then
 		echo "Erreur : Il faut au moins une archive"
 		exit 6
@@ -96,15 +104,15 @@ else
 
 	for i in $@; do 
 		nom_arch=$(basename "$i")
-		date_import=$(date +%Y%m%d-%H%M%S) #Prépare la date d'importation
+		date_import=$(date +%Y%m%d-%H%M%S)
 
-		if [ ! -f "$i" ]; then #Vérifie si cet argument est une archive
+		if [ ! -f "$i" ]; then #Vérifie si l'archive existe
 				echo "Erreur : Le chemin vers $nom_arch votre archive n'est pas valable"
 				echo "Le programme n'importe les archives suivantes que s'il n'as pas rencontré de problèmes avec les précédentes"
 				exit 2
 		fi
 
-		if [[ "$nom_arch" != *.tar.gz ]]; then
+		if [[ "$nom_arch" != *.tar.gz ]]; then #Vérifie l'extension
 			echo "Erreur : l'extension de votre archive n'est pas .tar.gz"
 			exit 2
 		fi
@@ -112,7 +120,7 @@ else
 		present=""
 		for l in .sh-toolbox/*; do
 			l_n=$(basename $l)
-			if [ "$l_n" = "archives" ]; then
+			if [ "$l_n" = "archives" ]; then #Ignore le fichier archives
 				continue
 			fi
 
@@ -121,9 +129,10 @@ else
 			fi
 		done
 
-		if [ "$present" = "o" ]; then #Si l'archive est déja présente dans le dossier .sh-toolbox
+		#-------CAS DEJA PRESENT-------
+		if [ "$present" = "o" ]; then
 
-			read -p "Le fichier $nom_arch est déja présent, voulez vous l'écraser ? (o/n) " rep
+			read -p "Le fichier $nom_arch est déja présent, voulez vous l'écraser ? (o/n) " rep #Choix pour l'utilisateur
 
 			if [ "$rep" = "o" ]; then
 
@@ -133,16 +142,19 @@ else
 					exit 3
 				fi
 
-				if ! sed -i "/^${nom_arch}:/s/:[^:]*:/:$date_import:/" ".sh-toolbox/archives"; then #Écrase après avoir reçu un oui
+				#Mise à jour de la date d'import
+				if ! sed -i "/^${nom_arch}:/s/:[^:]*:/:$date_import:/" ".sh-toolbox/archives"; then
 					echo "Erreur : Problème lors de la mise à jour d'archives"
 					echo "Le programme n'importe les archives suivantes que s'il n'as pas rencontré de problèmes avec les précédentes"
 					exit 4
 				fi
-
+			
+			#Si refuse, exit
 			elif [ "$rep" = "n" ]; then
 				echo "Écrasement de $nom_arch annulé"
-				exit 0 #Sinon ne fait rien
-				
+				exit 0
+
+			#Si réponse non conforme	
 			else
 				echo "Erreur : Votre réponse n'est pas sous le format attendu"
 				echo "Annulation de l'écrasement de $nom_arch par défaut"
@@ -150,6 +162,7 @@ else
 			fi
 
 		else
+			#-------CAS PAS PRESENT-------
 			echo "Importation normale de $nom_arch"
 			if ! cp $i .sh-toolbox; then
 				echo "Erreur : La copie de $nom_arch n'as pas réussie"
@@ -164,7 +177,6 @@ else
 				exit 4
 			fi
 
-			#On rajoute la ligne de la nouvelle archive importee
 			echo "${nom_arch}:${date_import}:" >> ".sh-toolbox/archives"
 
 		fi
