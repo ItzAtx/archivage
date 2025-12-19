@@ -46,7 +46,7 @@ Utilisation : ./check-archive.sh
 
 -----------------
 restore-archive.sh :
-Restaure les fichiers chiffrés d'une archive en récupérant automatiquement la clé de déchiffrement
+Restaure les fichiers chiffrés d'une archive en récupérant automatiquement la clé de déchiffrement (utilise celle en base64 mais l'affiche en clair)
 
 Utilisation : ./restore-archive.sh <dossier_destination>
 -----------------

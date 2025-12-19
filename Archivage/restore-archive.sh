@@ -64,7 +64,7 @@ if [ ! -s encrypted_files ]; then #Vérifie qu'on a trouvé au moins un fichier 
         exit 5
 fi
 
-cle=""
+cle_b64=""
 clear=""
 chiff=""
 
@@ -78,12 +78,14 @@ while read line; do #On va essayer de trouver la clé grace un fichier dans sa v
                 mkdir -p .sh-toolbox/$redi_path
                 touch .sh-toolbox/$redi_path/KEY
                 $FINDKEY tmp_d tmp_c -o .sh-toolbox/$redi_path/KEY 2> sortie_erreur.txt
-                cle=$(cat .sh-toolbox/$redi_path/KEY)
+                cle_b64=$(cat .sh-toolbox/$redi_path/KEY)
+                cle=$(echo -n $cle_b64 | base64 -d)
+                echo -n $cle > .sh-toolbox/$redi_path/KEY
                 break
         fi
 done < check_output
 
-if [ -z "$cle" ]; then #Vérifie qu'on a bien trouvé une cle
+if [ -z "$cle_b64" ]; then #Vérifie qu'on a bien trouvé une cle
         echo "Erreur : Impossible de retrouver la clé"
         rm -R ".sh-toolbox/$redi_path"
         exit 5
@@ -117,7 +119,6 @@ for chiff in $(cat encrypted_files); do
                 fi
         fi
 
-        cle_b64=$(echo -n $cle | base64)
         base64 -w0 $chiff > tmp
         "$DECIPHER" $cle_b64 tmp
         base64 -d tmp > $dest
