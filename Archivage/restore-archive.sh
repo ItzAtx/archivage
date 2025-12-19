@@ -33,6 +33,10 @@ if [ ! -f ".sh-toolbox/$choix" ]; then #Vérifie que l'archive choisie existe
         exit 5
 fi
 
+if [ -d stock_decomp ]; then
+        rm -R stock_decomp
+fi
+
 tmp="stock_decomp"
 mkdir -p "$tmp"
 tar -xzf ".sh-toolbox/$choix" -C "$tmp" #Décompresse l'archive
@@ -72,15 +76,15 @@ while read line; do #On va essayer de trouver la clé grace un fichier dans sa v
         if echo "$line" | grep -q "On a trouvé le fichier"; then
                 chiff=$(echo "$line" | sed 's/On a trouvé le fichier \(.*\) avant .*/\1/')
                 clear=$(echo "$line" | sed 's/.*il s.agit de : \(.*\)/\1/')
-                base64 -w0 $chiff > tmp_c
-                base64 -w0 $clear > tmp_d
+                base64 -w0 "$chiff" > tmp_c
+                base64 -w0 "$clear" > tmp_d
                 redi_path="${choix%%.*}"
-                mkdir -p .sh-toolbox/$redi_path
-                touch .sh-toolbox/$redi_path/KEY
-                $FINDKEY tmp_d tmp_c -o .sh-toolbox/$redi_path/KEY 2> sortie_erreur.txt
-                cle_b64=$(cat .sh-toolbox/$redi_path/KEY)
-                cle=$(echo -n $cle_b64 | base64 -d)
-                echo -n $cle > .sh-toolbox/$redi_path/KEY
+                mkdir -p .sh-toolbox/"$redi_path"
+                touch .sh-toolbox/"$redi_path"/KEY
+                "$FINDKEY" tmp_d tmp_c -o .sh-toolbox/"$redi_path"/KEY 2> sortie_erreur.txt
+                cle_b64=$(cat .sh-toolbox/"$redi_path"/KEY)
+                cle=$(echo -n "$cle_b64" | base64 -d)
+                echo -n "$cle" > .sh-toolbox/"$redi_path"/KEY
                 break
         fi
 done < check_output
@@ -122,7 +126,7 @@ for chiff in $(cat encrypted_files); do
         base64 -w0 $chiff > tmp
         "$DECIPHER" $cle_b64 tmp
         base64 -d tmp > $dest
-        if [ ! $dest ]; then
+        if [ ! -f $dest ]; then
                 echo "Erreur : Impossible de restaurer $chiff"
                 exit 4
         fi

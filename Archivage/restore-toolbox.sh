@@ -30,7 +30,7 @@ courant=2 #Pour sauter la ligne du compteur
 total=$(wc -l < .sh-toolbox/archives)
 
 #Vérifie que toutes les archives dans .sh-toolbox sont mentionnées dans le fichier archives
-while [ $courant -le $total ]; do
+while [ "$courant" -le "$total" ]; do
     ligne=$(sed -n "${courant}p" .sh-toolbox/archives) 
     archive=$(echo "$ligne" | cut -d ':' -f 1)
 
