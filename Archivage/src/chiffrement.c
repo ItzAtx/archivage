@@ -407,24 +407,19 @@ void findkey(string plain_name, string ciphered_name, string path, int mode){
     }
     key_b64_padded[padded_len] = '\0';
 
-    //On decode la clé (elle était en b64)
-    size_t real_key_size;
-    unsigned string real_key = base64_decode(key_b64_padded, padded_len, &real_key_size);
-
     if (!mode){
-        printf("%s\n", real_key);
+        printf("%s\n", key_b64_padded);
     } else {
         FILE *f = fopen(path, "w");
-        fprintf(f, "%s\n", real_key);
+        fprintf(f, "%s\n", key_b64_padded);
     }
-    fprintf(stderr, "%ld\n", real_key_size);
+    fprintf(stderr, "%d\n", key_len);
 
     free(plain_data);
     free(ciphered_data);
     free(repeted_key);
     free(key_b64);
     free(key_b64_padded);
-    free(real_key);
 }
 
 /*
