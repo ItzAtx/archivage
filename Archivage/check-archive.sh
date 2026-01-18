@@ -138,5 +138,4 @@ while read affecte; do
 
 done < modif_list
 rm  "modif_list"
-rm -rf "stock_decomp"
 exit 0
